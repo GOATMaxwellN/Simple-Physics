@@ -1,6 +1,7 @@
-""""""
+"""Main module that shows window with main menu"""
 from tkinter import *
 from tkinter import ttk
+from projectile_motion import ProjectileMotionFrame
 
 
 class SimplePhysics:
@@ -20,12 +21,20 @@ class SimplePhysics:
         style.configure("TLabel", font=self.REGULAR_FONT)
         style.configure("Heading.TLabel", font=self.HEADING_FONT)
         
-        # Create the content frame
+        # Create the content frame for main menu
         self.mainframe = ttk.Frame(self.root)
         self.mainframe.pack(fill=BOTH, expand=True)
 
         self.create_title()
         self.create_buttons()
+
+        # Create all the frames going to be used
+        self.cur_frame = self.mainframe
+        self.frames = {
+            "main_menu": self.mainframe,
+            "projectile_motion": ProjectileMotionFrame
+        }
+
 
 
     def create_title(self):
@@ -42,7 +51,7 @@ class SimplePhysics:
         """Creates the buttons that lead to the physics animations"""
         # Names of physics animations included
         physics_anims = (
-            ("Projectile Motion", self.projectile_motion, (0, 0)),
+            ("Projectile Motion", self.show_projectile_motion_frame, (0, 0)),
         )
 
         # Frame that will hold all the buttons
@@ -54,8 +63,22 @@ class SimplePhysics:
             (ttk.Button(buttons_frame, text=anim, command=func)
                 .grid(column=colrow[0], row=colrow[1], padx=pad, pady=pad))
 
-    def projectile_motion(self):
-        print("I will show you projectile motion")
+    def switch_frame(self, frame_name):
+        """Switch to a different frame, which is usually going to be a 
+        showing some physics animation"""
+        self.cur_frame.destroy()
+        self.cur_frame = self.frames[frame_name](self.root)
+        self.cur_frame.pack(fill=BOTH, side=TOP, expand=True)
+
+    def show_main_menu(self):
+        """Shows the main menu frame"""
+        # TODO: This doesn't work for main menu for now since the frame
+        # holding the main menu is not a class to be initialiazed
+        self.switch_frame("main_menu")
+
+    def show_projectile_motion_frame(self):
+        """Shows the projectile motion frame"""
+        self.switch_frame("projectile_motion")
 
 
 if __name__ == "__main__":
