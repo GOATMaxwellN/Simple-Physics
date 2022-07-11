@@ -6,7 +6,6 @@ from projectile_motion import ProjectileMotionFrame
 
 class SimplePhysics:
 
-    GEOMETRY = "500x500"
     REGULAR_FONT = ("Times", 15)
     HEADING_FONT = ("Times", 20, "bold")
 
@@ -14,7 +13,7 @@ class SimplePhysics:
     def __init__(self, root):
         self.root = root
         self.root.title("Simple Physics")
-        self.root.geometry(self.GEOMETRY)
+        self.root.state("zoomed")
 
         # Create styles
         style = ttk.Style(self.root)
@@ -34,8 +33,6 @@ class SimplePhysics:
             "main_menu": self.mainframe,
             "projectile_motion": ProjectileMotionFrame
         }
-
-
 
     def create_title(self):
         """Creates the 'Simple Physics' label to the top of the menu screen"""
