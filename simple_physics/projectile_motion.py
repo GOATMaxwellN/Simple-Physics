@@ -2,6 +2,7 @@
 from tkinter import *
 from tkinter import ttk
 from math import floor, sin, cos, radians
+import logger
 
 
 class ProjectileMotionFrame(ttk.Frame):
@@ -98,19 +99,21 @@ class ProjectileMotionFrame(ttk.Frame):
         time_in_the_air = 2 * (v_vel/g)
         time = 0
         upc_num = 10  # unit to pixel conversion 
-        print("init_velocity", init_velocity, "v_vel", v_vel, "h_vel", h_vel, "time in the air", time_in_the_air, sep=" ")
         x = y = 0  # local start positions
+        logger.new_pm_log()
         while time <= time_in_the_air:
-            print("cur_time ", time)
             # get new pos
             new_x = h_vel * time
             new_y = v_vel*time - (1/2)*g*time**2
             # calculate difference from current pos for canvas.move()
             # then convert to pixels
-            x_off = floor((new_x - x) * upc_num)
-            y_off = floor((new_y - y) * upc_num)
+            x_off = round((new_x - x) * upc_num)
+            y_off = round((new_y - y) * upc_num)
+            # LOG
+            logger.pm_log(x, y, new_x, new_y, x_off, y_off, 
+                         (new_x-x)*upc_num, (new_y-y)*upc_num, 
+                         time, time_in_the_air)
             self.canvas.move(self.ball, x_off, -y_off)
             # set cur pos to new pos
             x, y = new_x, new_y
-
-            time += time_in_the_air / 2
+            time += time_in_the_air / 10
