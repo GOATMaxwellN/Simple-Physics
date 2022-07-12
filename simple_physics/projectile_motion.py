@@ -1,8 +1,10 @@
 """Frame class that shows animation for projectile motion"""
+import threading
 from tkinter import *
 from tkinter import ttk
 from math import floor, sin, cos, radians
 import logger
+from time import sleep
 
 
 class ProjectileMotionFrame(ttk.Frame):
@@ -88,6 +90,33 @@ class ProjectileMotionFrame(ttk.Frame):
 
     def throw(self):
         """Starts projectile motion animation given configs"""
+        def throw_animation():
+            """Inner function that holds the while loop doing the animation.
+            Done in a seperate thread so mainloop isn't interrupted"""
+            # 50 is arbitrary, and actually needs to be adjusted depending
+            # on how long animation lasts (how long it is in the air)
+            time_step = time_in_the_air / 50 
+            time = 0
+            x = y = 0  # local start positions
+            logger.new_pm_log()
+            while time <= time_in_the_air:
+                # get new pos
+                new_x = h_vel * time
+                new_y = v_vel*time - (1/2)*g*time**2
+                # calculate difference from current pos for canvas.move()
+                # then convert to pixels
+                x_off = round((new_x - x) * upc_num)
+                y_off = round((new_y - y) * upc_num)
+                # LOG
+                logger.pm_log(x, y, new_x, new_y, x_off, y_off, 
+                            (new_x-x)*upc_num, (new_y-y)*upc_num, 
+                            time, time_in_the_air, verbose=False)
+                self.canvas.move(self.ball, x_off, -y_off)
+                # set cur pos to new pos
+                x, y = new_x, new_y
+                time += time_step
+                sleep(1/30)  # maintains a rough frame rate | sleep(1/frame_rate)
+        
         # TODO: curently only works for when initial vertical displacement is 0
         # Convert angle to radians
         angle = radians(int(self.angle.get()))
@@ -95,25 +124,8 @@ class ProjectileMotionFrame(ttk.Frame):
         v_vel = init_velocity * sin(angle)
         h_vel = init_velocity * cos(angle)
         g = 9.8
-
         time_in_the_air = 2 * (v_vel/g)
-        time = 0
-        upc_num = 10  # unit to pixel conversion 
-        x = y = 0  # local start positions
-        logger.new_pm_log()
-        while time <= time_in_the_air:
-            # get new pos
-            new_x = h_vel * time
-            new_y = v_vel*time - (1/2)*g*time**2
-            # calculate difference from current pos for canvas.move()
-            # then convert to pixels
-            x_off = round((new_x - x) * upc_num)
-            y_off = round((new_y - y) * upc_num)
-            # LOG
-            logger.pm_log(x, y, new_x, new_y, x_off, y_off, 
-                         (new_x-x)*upc_num, (new_y-y)*upc_num, 
-                         time, time_in_the_air)
-            self.canvas.move(self.ball, x_off, -y_off)
-            # set cur pos to new pos
-            x, y = new_x, new_y
-            time += time_in_the_air / 10
+        upc_num = 20  # unit to pixel conversion
+
+        animation = threading.Thread(target=throw_animation)
+        animation.start()
