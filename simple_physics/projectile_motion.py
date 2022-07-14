@@ -37,10 +37,11 @@ class ProjectileMotionFrame(ttk.Frame):
 
     def create_canvas(self):
         """Create and add canvas widget to frame"""
-        # width and height set to 1 in order to allow weight of rows to
-        # determine size and keep proportions
+        # Width and height set to 1 in order to allow weight of rows to
+        # determine size. Highlightthickness set to 0 to remove default
+        # border in canvas
         self.canvas = Canvas(self, background=self.CANVAS_BG_COLOR, 
-            width=1, height=1)
+            highlightthickness=0, width=1, height=1)
         self.canvas.grid(column=0, row=0, sticky=(N, E, S, W))
 
     def create_configurables(self):
@@ -79,11 +80,12 @@ class ProjectileMotionFrame(ttk.Frame):
 
     def create_scene(self):
         """Adds items to the canvas"""
-        w, h = self.canvas.winfo_width(), self.canvas.winfo_height()
         # Create floor
-        floor_coords = (0, floor(h*0.7), w, floor(h*0.7))
+        w, h = self.canvas.winfo_width(), self.canvas.winfo_height()
+        thickness = 3
+        floor_coords = (0, h-thickness, w, h-thickness)
         floor_line = self.canvas.create_line(
-            *floor_coords, fill="black", width=3)
+            *floor_coords, fill="black", width=thickness)
 
         # Create ball on the floor
         offset = 10  # offset from left edge of canvas
