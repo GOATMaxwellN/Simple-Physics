@@ -104,11 +104,12 @@ class ProjectileMotionFrame(ttk.Frame):
             Done in a seperate thread so mainloop isn't interrupted"""
             # 50 is arbitrary, and actually needs to be adjusted depending
             # on how long animation lasts (how long it is in the air)
-            time_step = time_in_the_air / 100
+            time_steps = round(time_in_the_air * 20)
+            time_step = time_in_the_air / time_steps
             time = 0
             x = y = 0  # local start positions
             logger.new_pm_log()
-            for _ in range(101):
+            for _ in range(time_steps+1):
                 # get new pos
                 new_x = h_vel * time
                 new_y = v_vel*time - (1/2)*g*time**2
