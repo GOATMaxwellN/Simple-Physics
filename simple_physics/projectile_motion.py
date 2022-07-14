@@ -32,7 +32,7 @@ class ProjectileMotionFrame(ttk.Frame):
 
         # Canvas items and variables to be created
         self.ball = None
-        self.floor_h = None
+        self.base_coords = None
         self.create_scene()
 
     def create_canvas(self):
@@ -72,6 +72,11 @@ class ProjectileMotionFrame(ttk.Frame):
         ttk.Button(config_frame, text="Throw", command=self.throw).grid(
             column=2, row=0, rowspan=2)
 
+        # Reset button
+        ttk.Button(
+            config_frame, text="Reset", command=self.reset_ball_position).grid(
+            column=2, row=1)
+
     def create_scene(self):
         """Adds items to the canvas"""
         w, h = self.canvas.winfo_width(), self.canvas.winfo_height()
@@ -84,9 +89,13 @@ class ProjectileMotionFrame(ttk.Frame):
         offset = 10  # offset from left edge of canvas
         floor_h = floor_coords[1]  # floor height
         ball_d = 50  # diameter of ball
-        self.ball = self.canvas.create_oval(
-            offset, floor_h-ball_d, ball_d+offset, floor_h, fill="red"
+        self.base_coords = (
+            offset, floor_h-ball_d, ball_d+offset, floor_h
         )
+        self.ball = self.canvas.create_oval(*self.base_coords, fill="red")
+
+    def reset_ball_position(self):
+        self.canvas.coords(self.ball, *self.base_coords)
 
     def throw(self):
         """Starts projectile motion animation given configs"""
@@ -95,11 +104,11 @@ class ProjectileMotionFrame(ttk.Frame):
             Done in a seperate thread so mainloop isn't interrupted"""
             # 50 is arbitrary, and actually needs to be adjusted depending
             # on how long animation lasts (how long it is in the air)
-            time_step = time_in_the_air / 50 
+            time_step = time_in_the_air / 100
             time = 0
             x = y = 0  # local start positions
             logger.new_pm_log()
-            while time <= time_in_the_air:
+            for _ in range(101):
                 # get new pos
                 new_x = h_vel * time
                 new_y = v_vel*time - (1/2)*g*time**2
