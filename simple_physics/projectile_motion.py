@@ -82,14 +82,16 @@ class ProjectileMotionFrame(ttk.Frame):
         """Adds items to the canvas"""
         # Create floor
         w, h = self.canvas.winfo_width(), self.canvas.winfo_height()
-        thickness = 3
-        floor_coords = (0, h-thickness, w, h-thickness)
+        thickness = 5
+        thickness_radius = thickness // 2
+        line_center = thickness_radius + 1
+        floor_coords = (0, h-line_center, w, h-line_center)
         floor_line = self.canvas.create_line(
             *floor_coords, fill="black", width=thickness)
 
         # Create ball on the floor
         offset = 10  # offset from left edge of canvas
-        floor_h = floor_coords[1]  # floor height
+        floor_h = floor_coords[1] - thickness_radius # floor height
         ball_d = 50  # diameter of ball
         self.base_coords = (
             offset, floor_h-ball_d, ball_d+offset, floor_h
