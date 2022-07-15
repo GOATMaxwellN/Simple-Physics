@@ -107,7 +107,7 @@ class ProjectileMotionFrame(ttk.Frame):
 
         # Create ball on the floor
         offset = 10  # Offset from left edge of canvas
-        self.floor_h = floor_coords[1] - thickness_radius # Top of the floor
+        self.floor_h = floor_coords[1] - thickness_radius + 1 # Top of the floor
         ball_d = 50  # Diameter of ball
         self.base_coords = (
             offset, self.floor_h-ball_d, ball_d+offset, self.floor_h)
