@@ -9,7 +9,7 @@ from time import sleep
 
 class ProjectileMotionFrame(ttk.Frame):
 
-    CANVAS_BG_COLOR = "#CCD1D1"
+    MAIN_COLOR = "#A4FAFA"
 
     def __init__(self, parent, **options):
         super().__init__(parent, **options)
@@ -22,8 +22,7 @@ class ProjectileMotionFrame(ttk.Frame):
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
 
-        # Just some temporary styling for visual aid
-        ttk.Style(self).configure("Config.TFrame", background="violet")
+        ttk.Style(self).configure("TButton", background=self.MAIN_COLOR)
 
         self.create_canvas()
         self.create_configurables()
@@ -40,8 +39,8 @@ class ProjectileMotionFrame(ttk.Frame):
         # Width and height set to 1 in order to allow weight of rows to
         # determine size. Highlightthickness set to 0 to remove default
         # border in canvas
-        self.canvas = Canvas(self, background=self.CANVAS_BG_COLOR, 
-            highlightthickness=0, width=1, height=1)
+        self.canvas = Canvas(self, background=self.MAIN_COLOR, 
+                             highlightthickness=0, width=1, height=1)
         self.canvas.grid(column=0, row=0, sticky=(N, E, S, W))
 
     def create_configurables(self):
@@ -71,7 +70,7 @@ class ProjectileMotionFrame(ttk.Frame):
 
         # Throw button
         ttk.Button(config_frame, text="Throw", command=self.throw).grid(
-            column=2, row=0, rowspan=2)
+            column=2, row=0)
 
         # Reset button
         ttk.Button(
@@ -94,8 +93,7 @@ class ProjectileMotionFrame(ttk.Frame):
         floor_h = floor_coords[1] - thickness_radius # Top of the floor
         ball_d = 50  # Diameter of ball
         self.base_coords = (
-            offset, floor_h-ball_d, ball_d+offset, floor_h
-        )
+            offset, floor_h-ball_d, ball_d+offset, floor_h)
         self.ball = self.canvas.create_oval(*self.base_coords, fill="red")
 
     def reset_ball_position(self):
@@ -106,8 +104,6 @@ class ProjectileMotionFrame(ttk.Frame):
         def throw_animation():
             """Inner function that holds the while loop doing the animation.
             Done in a seperate thread so mainloop isn't interrupted"""
-            # 50 is arbitrary, and actually needs to be adjusted depending
-            # on how long animation lasts (how long it is in the air)
             time_steps = round(time_in_the_air * 20)
             time_step = time_in_the_air / time_steps
             time = 0
@@ -122,9 +118,9 @@ class ProjectileMotionFrame(ttk.Frame):
                 x_off = round((new_x - x) * upc_num)
                 y_off = round((new_y - y) * upc_num)
                 # LOG
-                logger.pm_log(x, y, new_x, new_y, x_off, y_off, 
-                            (new_x-x)*upc_num, (new_y-y)*upc_num, 
-                            time, time_in_the_air, verbose=False)
+                logger.pm_log(x, y, new_x, new_y, x_off, y_off,
+                              (new_x-x)*upc_num, (new_y-y)*upc_num,
+                              time, time_in_the_air, verbose=False)
                 self.canvas.move(self.ball, x_off, -y_off)
                 # set cur pos to new pos
                 x, y = new_x, new_y
