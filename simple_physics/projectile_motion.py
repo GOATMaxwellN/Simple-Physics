@@ -2,7 +2,7 @@
 import threading
 from tkinter import *
 from tkinter import ttk
-from math import floor, sin, cos, radians
+from math import sin, cos, radians
 import logger
 from time import sleep
 
@@ -10,6 +10,8 @@ from time import sleep
 class ProjectileMotionFrame(ttk.Frame):
 
     MAIN_COLOR = "#A4FAFA"
+
+    UNITS = ("m", "ft")
 
     def __init__(self, parent, **options):
         super().__init__(parent, **options)
@@ -32,6 +34,8 @@ class ProjectileMotionFrame(ttk.Frame):
         # Canvas items and variables to be created
         self.ball = None
         self.base_coords = None
+        self.floor_h = None
+        self.upc_num = 20  # Unit to pixel conversion (eg. 1m = upc_num pixels)
         self.create_scene()
 
     def create_canvas(self):
@@ -49,33 +53,46 @@ class ProjectileMotionFrame(ttk.Frame):
         config_frame.grid(column=0, row=1, sticky=(N, E, S, W))
 
         # Grid configurations
-        for i in range(3):
+        for i in range(4):
             config_frame.columnconfigure(i, weight=1)
         config_frame.rowconfigure(0, weight=1)
         config_frame.rowconfigure(1, weight=1)
 
         # Settings to config projectile motion
         # Initial velocity
-        self.init_velocity = StringVar(value="10")
+        self.init_velocity = StringVar(value=10)
         ttk.Label(config_frame, text="Initial velocity").grid(
             column=0, row=0, sticky=S)
-        ttk.Entry(config_frame, textvariable=self.init_velocity).grid(
+        ttk.Spinbox(
+            config_frame, from_=0, textvariable=self.init_velocity).grid(
             column=0, row=1, sticky=N)
+
         # Angle
-        self.angle = StringVar(value="45")
+        self.angle = StringVar(value=45)
         ttk.Label(config_frame, text="Angle").grid(
             column=1, row=0, sticky=S)
-        ttk.Entry(config_frame, textvariable=self.angle).grid(
+        self.spin = ttk.Spinbox(config_frame, from_=0, to=90, textvariable=self.angle)
+        self.spin.grid(
             column=1, row=1, sticky=N)
+
+        # Distance unit combobox
+        self.unit = StringVar()
+        ttk.Label(config_frame, text="Distance unit").grid(
+            column=2, row=0, sticky=S)
+        units_box = ttk.Combobox(config_frame, textvariable=self.unit)
+        units_box.grid(column=2, row=1, sticky=N)
+        units_box["values"] = self.UNITS
+        units_box["state"] = "readonly"
+        units_box.set("m")  # Make meters default unit
 
         # Throw button
         ttk.Button(config_frame, text="Throw", command=self.throw).grid(
-            column=2, row=0)
+            column=3, row=0)
 
         # Reset button
         ttk.Button(
             config_frame, text="Reset", command=self.reset_ball_position).grid(
-            column=2, row=1)
+            column=3, row=1)
 
     def create_scene(self):
         """Adds items to the canvas"""
@@ -90,10 +107,10 @@ class ProjectileMotionFrame(ttk.Frame):
 
         # Create ball on the floor
         offset = 10  # Offset from left edge of canvas
-        floor_h = floor_coords[1] - thickness_radius # Top of the floor
+        self.floor_h = floor_coords[1] - thickness_radius # Top of the floor
         ball_d = 50  # Diameter of ball
         self.base_coords = (
-            offset, floor_h-ball_d, ball_d+offset, floor_h)
+            offset, self.floor_h-ball_d, ball_d+offset, self.floor_h)
         self.ball = self.canvas.create_oval(*self.base_coords, fill="red")
 
     def reset_ball_position(self):
@@ -115,11 +132,11 @@ class ProjectileMotionFrame(ttk.Frame):
                 new_y = v_vel*time - (1/2)*g*time**2
                 # calculate difference from current pos for canvas.move()
                 # then convert to pixels
-                x_off = round((new_x - x) * upc_num)
-                y_off = round((new_y - y) * upc_num)
+                x_off = round((new_x - x) * self.upc_num)
+                y_off = round((new_y - y) * self.upc_num)
                 # LOG
                 logger.pm_log(x, y, new_x, new_y, x_off, y_off,
-                              (new_x-x)*upc_num, (new_y-y)*upc_num,
+                              (new_x-x)*self.upc_num, (new_y-y)*self.upc_num,
                               time, time_in_the_air, verbose=False)
                 self.canvas.move(self.ball, x_off, -y_off)
                 # set cur pos to new pos
@@ -135,7 +152,6 @@ class ProjectileMotionFrame(ttk.Frame):
         h_vel = init_velocity * cos(angle)
         g = 9.8
         time_in_the_air = 2 * (v_vel/g)
-        upc_num = 20  # unit to pixel conversion
 
         animation = threading.Thread(target=throw_animation)
         animation.start()
