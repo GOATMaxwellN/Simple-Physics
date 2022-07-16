@@ -74,8 +74,8 @@ class ProjectileMotionFrame(ttk.Frame):
         ttk.Label(config_frame, text="Initial velocity").grid(
             column=0, row=0, sticky=S)
         ttk.Spinbox(
-            config_frame, from_=0, textvariable=self.init_velocity).grid(
-            column=0, row=1, sticky=N)
+            config_frame, from_=0, to=9999, 
+            textvariable=self.init_velocity).grid(column=0, row=1, sticky=N)
 
         # Angle
         self.angle = StringVar(value=45)
