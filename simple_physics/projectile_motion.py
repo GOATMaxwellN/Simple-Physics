@@ -10,8 +10,18 @@ from time import sleep
 class ProjectileMotionFrame(ttk.Frame):
 
     MAIN_COLOR = "#A4FAFA"
-
     UNITS = ("m", "ft")
+
+    # BALL VARIABLES
+    BALL_D = 50  # Diameter of ball
+    BALL_R = BALL_D // 2
+    BALL_OFFSET = 20  # Offset from left edge of the canvas
+    BALL_CENTER = BALL_OFFSET + BALL_R  # Center of ball in y coord
+
+    # SCALE / GRID VARIABLES
+    LINE_HEIGHT = 20
+    TEXT_HEIGHT = LINE_HEIGHT + 5
+    SCALE_FONT = ("Helvetica", 7)
 
     def __init__(self, parent, **options):
         super().__init__(parent, **options)
@@ -106,12 +116,27 @@ class ProjectileMotionFrame(ttk.Frame):
             *floor_coords, fill="black", width=thickness)
 
         # Create ball on the floor
-        offset = 10  # Offset from left edge of canvas
         self.floor_h = floor_coords[1] - thickness_radius - 1 # Top of the floor
-        ball_d = 50  # Diameter of ball
         self.base_coords = (
-            offset, self.floor_h-ball_d, ball_d+offset, self.floor_h)
+            self.BALL_OFFSET, self.floor_h-self.BALL_D, 
+            self.BALL_D+self.BALL_OFFSET, self.floor_h)
         self.ball = self.canvas.create_oval(*self.base_coords, fill="red")
+
+        self.draw_scale()
+
+    def draw_scale(self):
+        """Make a grid like scale around the canvas"""
+        skip = 4
+        for i in range(self.winfo_width() // self.upc_num):
+            if i % skip != 0:
+                continue
+            self.canvas.create_line(
+                i*self.upc_num+self.BALL_CENTER, self.floor_h, 
+                i*self.upc_num+self.BALL_CENTER, self.floor_h-self.LINE_HEIGHT,
+                fill="grey")
+            self.canvas.create_text(
+                i*self.upc_num+self.BALL_CENTER, self.floor_h-self.TEXT_HEIGHT,
+                text=f"{i}{self.unit.get()}", font=self.SCALE_FONT)
 
     def reset_ball_position(self):
         self.canvas.coords(self.ball, *self.base_coords)
